@@ -72,6 +72,10 @@ public class IEMovieDataBase {
         return movie.getCast().stream().map(id -> dataBase.getActor(id).getName()).collect(Collectors.toList());
     }
 
+    public List<Actor> getActors() {
+        return dataBase.getActors();
+    }
+
     public Movie getMovieById(int id){
         return dataBase.getMovie(id);
     }

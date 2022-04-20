@@ -15,7 +15,7 @@ public class AddActorCommand implements Command {
             if (actor.checkNull())
                 throw new Exception();
         } catch (Exception exception) {
-//            throw new Exception("InvalidCommand");
+            throw new Exception("InvalidCommand");
         }
     }
 }

@@ -39,7 +39,9 @@ public class Initializer {
             getMoviesFromService();
             getUsersFromService();
             getCommentsFromService();
-        } catch (Exception e) {}
+        } catch (Exception e) {
+            System.out.println(e);
+        }
     }
 
     private JSONArray getDataFromURL(String url) throws Exception {
@@ -50,27 +52,38 @@ public class Initializer {
 
     private void getMoviesFromService() throws Exception {
         JSONArray jsonArray = getDataFromURL(MOVIES_API);
-        for (Object jsonObject : jsonArray)
-            addMovie(jsonObject.toString());
+        for (Object jsonObject : jsonArray) {
+            try {
+                addMovie(jsonObject.toString());
+            } catch (Exception e) {}
+        }
     }
 
     private void getActorsFromService() throws Exception {
         JSONArray jsonArray = getDataFromURL(ACTORS_API);
         for (Object jsonObject : jsonArray) {
-            addActor(jsonObject.toString());
+            try {
+                addActor(jsonObject.toString());
+            }catch (Exception e) {}
         }
     }
 
     private void getUsersFromService() throws Exception {
         JSONArray jsonArray = getDataFromURL(USERS_API);
-        for (Object jsonObject : jsonArray)
-            addUser(jsonObject.toString());
+        for (Object jsonObject : jsonArray) {
+            try {
+                addUser(jsonObject.toString());
+            } catch (Exception e) {}
+        }
     }
 
     private void getCommentsFromService() throws Exception {
         JSONArray jsonArray = getDataFromURL(COMMENTS_API);
-        for (Object jsonObject : jsonArray)
-            addComment(jsonObject.toString());
+        for (Object jsonObject : jsonArray) {
+            try {
+                addComment(jsonObject.toString());
+            } catch (Exception e) {}
+        }
     }
 
     private void addActor(String json) throws Exception {

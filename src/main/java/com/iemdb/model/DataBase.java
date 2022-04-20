@@ -164,6 +164,8 @@ public class DataBase {
     public void addMovieToUserWatchList(int movieId, String userId) throws AgeLimitError, MovieAlreadyExists {
         Movie movie = getMovie(movieId);
         User user = getUserByEmail(userId);
+        System.out.println(user);
+        System.out.println(movie);
         user.addToWatchList(movie);
     }
 

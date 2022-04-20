@@ -20,8 +20,4 @@ public class Movies {
         return IEMovieDataBase.getInstance().getMovieById(id);
     }
 
-    @PostMapping("/moives")
-    public
-
-
 }
