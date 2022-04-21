@@ -4,11 +4,11 @@ import org.springframework.http.HttpStatus;
 
 import javax.servlet.ServletException;
 
-public class AgeLimitError extends RestException {
-    public AgeLimitError(){ super("AgeLimitError"); }
+public class LoginRequired extends RestException {
+    public LoginRequired() {super("Login Required!");}
 
     @Override
     public HttpStatus getStatusCode() {
-        return HttpStatus.BAD_REQUEST;
+        return HttpStatus.FORBIDDEN;
     }
 }

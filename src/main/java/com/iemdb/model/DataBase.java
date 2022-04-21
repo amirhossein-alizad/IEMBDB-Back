@@ -7,6 +7,7 @@ import com.iemdb.Entity.Comment;
 import com.iemdb.Entity.Movie;
 import com.iemdb.Entity.User;
 import com.iemdb.exception.AgeLimitError;
+import com.iemdb.exception.CommentNotFound;
 import com.iemdb.exception.MovieAlreadyExists;
 import com.iemdb.exception.MovieNotFound;
 
@@ -147,22 +148,30 @@ public class DataBase {
 
     }
 
-    public void rateMovie(MovieRating movieRating) {
+    public void rateMovie(MovieRating movieRating) throws MovieNotFound {
         for (Movie movie : movies) {
-            if (movie.getId() == movieRating.getMovieId())
+            if (movie.getId() == movieRating.getMovieId()) {
                 movie.addRating(movieRating);
+                return;
+            }
         }
+        throw new MovieNotFound();
     }
 
-    public void voteComment(CommentVote commentVote) {
+    public void voteComment(CommentVote commentVote) throws CommentNotFound{
         for (Comment comment : comments) {
-            if (comment.getId() == commentVote.getCommentId())
+            if (comment.getId() == commentVote.getCommentId()) {
                 comment.addVote(commentVote);
+                return;
+            }
         }
+        throw new CommentNotFound();
     }
 
-    public void addMovieToUserWatchList(int movieId, String userId) throws AgeLimitError, MovieAlreadyExists {
+    public void addMovieToUserWatchList(int movieId, String userId) throws AgeLimitError, MovieAlreadyExists, MovieNotFound {
         Movie movie = getMovie(movieId);
+        if (movie == null)
+            throw new MovieNotFound();
         User user = getUserByEmail(userId);
         System.out.println(user);
         System.out.println(movie);

@@ -83,9 +83,7 @@ public class User {
             throw new MovieAlreadyExists();
         if (movie.getAgeLimit() > (LocalDate.now().getYear() - birthDate.getYear()))
             throw new AgeLimitError();
-        System.out.println("movie added to watchlist");
         watchList.add(movie);
-        System.out.println(watchList);
     }
 
     public void removeFromWatchList(Movie movie) throws MovieNotFound {

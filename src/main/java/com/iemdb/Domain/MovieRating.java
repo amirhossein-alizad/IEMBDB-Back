@@ -1,5 +1,7 @@
 package com.iemdb.Domain;
 
+import com.iemdb.exception.InvalidRateScore;
+
 import java.lang.reflect.Field;
 
 public class MovieRating {
@@ -30,7 +32,9 @@ public class MovieRating {
         return score;
     }
 
-    public void setScore(int score) {
+    public void setScore(int score) throws InvalidRateScore{
+        if (score > 10 || score < 1)
+            throw new InvalidRateScore();
         this.score = score;
     }
 

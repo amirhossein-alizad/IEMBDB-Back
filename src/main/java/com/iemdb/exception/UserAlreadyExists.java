@@ -2,10 +2,8 @@ package com.iemdb.exception;
 
 import org.springframework.http.HttpStatus;
 
-import javax.servlet.ServletException;
-
-public class AgeLimitError extends RestException {
-    public AgeLimitError(){ super("AgeLimitError"); }
+public class UserAlreadyExists extends RestException {
+    public UserAlreadyExists() {super("UserAlreadyExists");}
 
     @Override
     public HttpStatus getStatusCode() {

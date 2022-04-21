@@ -2,15 +2,14 @@ package com.iemdb.model;
 
 import com.iemdb.Domain.CommentVote;
 import com.iemdb.Domain.MovieRating;
-import com.iemdb.Entity.Actor;
-import com.iemdb.Entity.Comment;
-import com.iemdb.Entity.Movie;
-import com.iemdb.Entity.User;
-import com.iemdb.exception.AgeLimitError;
-import com.iemdb.exception.MovieAlreadyExists;
-import com.iemdb.exception.MovieNotFound;
-import com.iemdb.exception.UserNotFound;
+import com.iemdb.Entity.*;
+import com.iemdb.exception.*;
 
+import java.nio.charset.StandardCharsets;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -33,7 +32,9 @@ public class IEMovieDataBase {
         return instance;
     }
 
-    public User getCurrentUser() {
+    public User getCurrentUser() throws LoginRequired{
+        if (currentUser == null)
+            throw new LoginRequired();
         return currentUser;
     }
 
@@ -45,6 +46,18 @@ public class IEMovieDataBase {
         User user = dataBase.getUserByEmail(userId);
         if(user == null)
             throw new UserNotFound();
+        return user;
+    }
+
+    public User addUser(String email, String password, String name, String nickname, LocalDate birthDate) throws UserAlreadyExists {
+        User user = null;
+        try {
+            user = getUser(email);
+        } catch (UserNotFound ignored) {}
+        if (user != null)
+            throw new UserAlreadyExists();
+        user = new User(email, password, nickname, name, birthDate);
+        dataBase.addUser(user);
         return user;
     }
 
@@ -68,6 +81,40 @@ public class IEMovieDataBase {
         }
     }
 
+    public List<Movie> filterMovies(String searchText, String searchBy) throws NumberFormatException {
+        if (searchText.equals(""))
+            return dataBase.getMovies();
+        List<Movie> filtered = new ArrayList<>();
+        switch (searchBy) {
+            case "name":
+                for (Movie movie : dataBase.getMovies())
+                    if (movie.getName().toLowerCase().contains(searchText.toLowerCase()))
+                        filtered.add(movie);
+                return filtered;
+            case "genre":
+                for (Movie movie : dataBase.getMovies())
+                    if (movie.getGenres().contains(searchText))
+                        filtered.add(movie);
+                return filtered;
+            case "date":
+                int releaseDate = Integer.parseInt(searchText);
+                for (Movie movie : dataBase.getMovies())
+                    if (movie.getReleaseDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate().getYear() == releaseDate)
+                        filtered.add(movie);
+                return filtered;
+            default:
+                return dataBase.getMovies();
+        }
+    }
+
+    public List<Movie> sortMovies(List<Movie> movies, String sortBy) {
+        if (sortBy.equals("rate"))
+            movies.sort(Comparator.comparing(Movie::getImdbRate, Comparator.reverseOrder()));
+        else if(sortBy.equals("date"))
+            movies.sort(Comparator.comparing(Movie::getReleaseDate, Comparator.reverseOrder()));
+        return movies;
+    }
+
     public List<String> getMoviesActorsName(Movie movie) {
         return movie.getCast().stream().map(id -> dataBase.getActor(id).getName()).collect(Collectors.toList());
     }
@@ -84,11 +131,11 @@ public class IEMovieDataBase {
         return movie.getCast().stream().map(dataBase::getActor).collect(Collectors.toList());
     }
 
-    public void addToWatchList(String user_id, int movieId) throws AgeLimitError, MovieAlreadyExists {
+    public void addToWatchList(String user_id, int movieId) throws AgeLimitError, MovieAlreadyExists, MovieNotFound {
         dataBase.addMovieToUserWatchList(movieId, user_id);
     }
 
-    public void rateMovie(String user_id, int movie_id, int rating) {
+    public void rateMovie(String user_id, int movie_id, int rating) throws InvalidRateScore, MovieNotFound{
         MovieRating movieRating = new MovieRating();
         movieRating.setUserEmail(user_id);
         movieRating.setMovieId(movie_id);
@@ -96,7 +143,7 @@ public class IEMovieDataBase {
         dataBase.rateMovie(movieRating);
     }
 
-    public void voteComment(String user_id, int comment_id, int vote) {
+    public void voteComment(String user_id, int comment_id, int vote) throws InvalidVoteValue, CommentNotFound {
         CommentVote commentVote = new CommentVote();
         commentVote.setCommentId(comment_id);
         commentVote.setUserEmail(user_id);
@@ -110,12 +157,17 @@ public class IEMovieDataBase {
             case -1:
                 commentVote.setVote("-1");
                 break;
+            default:
+                throw new InvalidVoteValue();
         }
         dataBase.voteComment(commentVote);
     }
 
-    public void addComment(int movieId, String user, String text) {
+    public void addComment(int movieId, String user, String text) throws MovieNotFound {
         Comment comment = new Comment();
+        Movie movie = dataBase.getMovie(movieId);
+        if (movie == null)
+            throw new MovieNotFound();
         comment.setMovieId(movieId);
         comment.setUserEmail(user);
         comment.setText(text);
@@ -131,6 +183,10 @@ public class IEMovieDataBase {
 
     public List<Movie> getActorMovies(int actorId) {
         return dataBase.getActorMovies(actorId);
+    }
+
+    public List<Comment> getComments() {
+        return dataBase.getComments();
     }
 
     public void removeMovieFromWatchList(int movieId, String userEmail) throws MovieNotFound {
