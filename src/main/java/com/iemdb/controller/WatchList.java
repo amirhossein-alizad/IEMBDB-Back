@@ -5,6 +5,7 @@ import com.iemdb.Entity.User;
 import com.iemdb.exception.LoginRequired;
 import com.iemdb.exception.RestException;
 import com.iemdb.model.IEMovieDataBase;
+import com.iemdb.utils.Utils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -13,10 +14,12 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
+@CrossOrigin(origins = "*", allowedHeaders = "*")
 public class WatchList {
 
     @GetMapping("/watchlist")
     public ResponseEntity<List<Movie>> getWatchList() {
+        Utils.wait(2000);
         try {
             List<Movie> watchlist = IEMovieDataBase.getInstance().getCurrentUser().getWatchList();
             return new ResponseEntity<>(watchlist, HttpStatus.OK);
@@ -26,7 +29,8 @@ public class WatchList {
     }
 
     @PostMapping("/watchlist")
-    public ResponseEntity<String> addToWatchlist(@RequestParam Map<String, String> input) {
+    public ResponseEntity<String> addToWatchlist(@RequestBody Map<String, String> input) {
+        Utils.wait(2000);
         try {
             User user = IEMovieDataBase.getInstance().getCurrentUser();
             int movie_id = Integer.parseInt(input.get("movie_id"));
@@ -40,7 +44,8 @@ public class WatchList {
     }
 
     @PostMapping("/watchlist/remove")
-    public ResponseEntity<String> removeFromWatchlist(@RequestParam Map<String, String> input) {
+    public ResponseEntity<String> removeFromWatchlist(@RequestBody Map<String, String> input) {
+        Utils.wait(2000);
         try {
             User user = IEMovieDataBase.getInstance().getCurrentUser();
             int movie_id = Integer.parseInt(input.get("movie_id"));
@@ -55,6 +60,7 @@ public class WatchList {
 
     @GetMapping("/recommendations")
     public ResponseEntity<List<Movie>> getRecommendation() {
+        Utils.wait(2000);
         try {
             User user = IEMovieDataBase.getInstance().getCurrentUser();
             List<Movie> recommendations = IEMovieDataBase.getInstance().getUserRecommendations(user.getEmail());

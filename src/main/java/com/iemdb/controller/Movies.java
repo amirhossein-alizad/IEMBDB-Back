@@ -1,12 +1,10 @@
 package com.iemdb.controller;
 
-import com.iemdb.Entity.Actor;
-import com.iemdb.Entity.Movie;
-import com.iemdb.Entity.MovieId;
-import com.iemdb.Entity.User;
+import com.iemdb.Entity.*;
+import com.iemdb.exception.MovieNotFound;
 import com.iemdb.exception.RestException;
 import com.iemdb.model.IEMovieDataBase;
-import jdk.jfr.Frequency;
+import com.iemdb.utils.Utils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -16,15 +14,18 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
+@CrossOrigin(origins = "*", allowedHeaders = "*")
 public class Movies {
 
     @GetMapping("/movies")
     public List<Movie> getMovies() {
+        Utils.wait(2000);
         return IEMovieDataBase.getInstance().getMoviesByFilter("", false);
     }
 
     @GetMapping("/movies/{id}")
     public ResponseEntity<Movie> getMovie(@PathVariable int id) {
+        Utils.wait(2000);
         Movie movie = IEMovieDataBase.getInstance().getMovieById(id);
         if (movie == null) {
             return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
@@ -34,6 +35,7 @@ public class Movies {
 
     @GetMapping("/movies/{id}/actors")
     public ResponseEntity<List<Actor>> getMovieActors(@PathVariable int id) {
+        Utils.wait(2000);
         try {
             Movie movie = IEMovieDataBase.getInstance().getMovieById(id);
             if (movie == null)
@@ -46,7 +48,8 @@ public class Movies {
     }
 
     @PostMapping("/movies")
-    public ResponseEntity<List<Movie>> filterMovies(@RequestParam Map<String, String> input) {
+    public ResponseEntity<List<Movie>> filterMovies(@RequestBody Map<String, String> input) {
+        Utils.wait(2000);
         try {
             input.computeIfAbsent("searchText", key -> {throw new RuntimeException(key + " not found!");});
             input.computeIfAbsent("searchBy", key -> {throw new RuntimeException(key + " not found!");});
@@ -64,7 +67,8 @@ public class Movies {
     }
 
     @PostMapping("/movies/{id}/rate")
-    public ResponseEntity<String> rateMovie(@PathVariable int id, @RequestParam Map<String, String> input) {
+    public ResponseEntity<String> rateMovie(@PathVariable int id, @RequestBody Map<String, String> input) {
+        Utils.wait(2000);
         try {
             User user = IEMovieDataBase.getInstance().getCurrentUser();
             int rate = Integer.parseInt(input.get("quantity"));
@@ -78,8 +82,9 @@ public class Movies {
         }
     }
 
-    @PostMapping("/movies/{id}/comment")
-    public ResponseEntity<String> commentOnMovie(@PathVariable int id, @RequestParam Map<String, String> input) {
+    @PostMapping("/movies/{id}/comments")
+    public ResponseEntity<String> commentOnMovie(@PathVariable int id, @RequestBody Map<String, String> input) {
+        Utils.wait(2000);
         try {
             input.computeIfAbsent("comment", key -> {throw new RuntimeException(key + " not found!");});
             User user = IEMovieDataBase.getInstance().getCurrentUser();
@@ -92,5 +97,23 @@ public class Movies {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
     }
+
+    @GetMapping("/movies/{id}/comments")
+    public ResponseEntity<List<Comment>> getMovieComments(@PathVariable int id) {
+        Utils.wait(2000);
+        try {
+            User user = IEMovieDataBase.getInstance().getCurrentUser();
+            Movie movie = IEMovieDataBase.getInstance().getMovieById(id);
+            if (movie == null)
+                throw new MovieNotFound();
+            return new ResponseEntity<>(movie.getComments(), HttpStatus.OK);
+        } catch (RestException e) {
+            return new ResponseEntity<>(null, e.getStatusCode());
+        } catch (Exception e) {
+            System.out.println(e);
+            return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
+        }
+    }
+
 
 }

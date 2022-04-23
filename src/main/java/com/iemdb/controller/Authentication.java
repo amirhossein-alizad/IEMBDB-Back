@@ -5,12 +5,10 @@ import com.iemdb.exception.RestException;
 import com.iemdb.exception.UserAlreadyExists;
 import com.iemdb.exception.UserNotFound;
 import com.iemdb.model.IEMovieDataBase;
+import com.iemdb.utils.Utils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDate;
@@ -18,25 +16,28 @@ import java.time.format.DateTimeFormatter;
 import java.util.Map;
 
 @RestController
+@CrossOrigin(origins = "*", allowedHeaders = "*")
 public class Authentication {
 
     @PostMapping("/login")
-    public ResponseEntity<String> login(@RequestParam Map<String, String> input) {
+    public ResponseEntity<User> login(@RequestBody Map<String, String> input) {
+        Utils.wait(2000);
         try {
             String username = input.get("username");
             String password = input.get("password");
             User user = IEMovieDataBase.getInstance().getUser(username);
             IEMovieDataBase.getInstance().setCurrentUser(user);
+            return new ResponseEntity<>(user, HttpStatus.OK);
         } catch (UserNotFound e) {
-            return new ResponseEntity<>(e.getMessage(), e.getStatusCode());
+            return new ResponseEntity<>(null, e.getStatusCode());
         } catch (Exception e) {
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
         }
-        return new ResponseEntity<>("You logged in successfully!", HttpStatus.OK);
     }
 
     @PostMapping("/signup")
-    public ResponseEntity<String> signup(@RequestParam Map<String, String> input) {
+    public ResponseEntity<String> signup(@RequestBody Map<String, String> input) {
+        Utils.wait(2000);
         try {
             input.computeIfAbsent("email", key -> {throw new RuntimeException(key + " not found!");});
             input.computeIfAbsent("password", key -> {throw new RuntimeException(key + " not found!");});
@@ -61,12 +62,14 @@ public class Authentication {
 
     @PostMapping("/logout")
     public ResponseEntity<String> logout() {
+        Utils.wait(2000);
         IEMovieDataBase.getInstance().setCurrentUser(null);
         return new ResponseEntity<>("You logged out successfully!", HttpStatus.OK);
     }
 
     @GetMapping("/user")
     public ResponseEntity<User> user() {
+        Utils.wait(2000);
         try {
             User user = IEMovieDataBase.getInstance().getCurrentUser();
             return new ResponseEntity<>(user, HttpStatus.OK);
