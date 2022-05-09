@@ -4,13 +4,23 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.iemdb.model.DataBase;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
+import javax.persistence.*;
 import java.lang.reflect.Field;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
 
+@Entity
+@Getter
+@Setter
+@NoArgsConstructor
 public class Actor {
+    @Id
     private int id;
     private String name;
 
@@ -19,8 +29,6 @@ public class Actor {
 
     private String nationality;
     private String image;
-
-    public Actor(){}
 
     public Actor(int id, String name, Date birthDate, String nationality, String image) {
         this.id = id;

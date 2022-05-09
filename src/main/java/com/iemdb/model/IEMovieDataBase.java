@@ -3,7 +3,12 @@ package com.iemdb.model;
 import com.iemdb.Domain.CommentVote;
 import com.iemdb.Domain.MovieRating;
 import com.iemdb.Entity.*;
+import com.iemdb.Repository.ActorRepository;
+//import com.iemdb.Repository.CommentRepository;
 import com.iemdb.exception.*;
+import lombok.NoArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Configuration;
 
 import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
@@ -13,16 +18,21 @@ import java.time.ZoneId;
 import java.util.*;
 import java.util.stream.Collectors;
 
+@Configuration
 public class IEMovieDataBase {
     private final DataBase dataBase;
     private final Initializer initializer;
     private User currentUser;
 
+    @Autowired
+    private ActorRepository actorRepository;
+//    @Autowired
+//    private CommentRepository commentRepository;
     private static IEMovieDataBase instance;
 
-    private IEMovieDataBase(){
+    IEMovieDataBase(){
         dataBase = new DataBase();
-        initializer = new Initializer(dataBase);
+        initializer = new Initializer(dataBase, actorRepository);
         initializer.getDataFromAPI();
     }
 

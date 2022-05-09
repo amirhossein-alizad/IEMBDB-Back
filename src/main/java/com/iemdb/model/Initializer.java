@@ -9,10 +9,13 @@ import com.iemdb.Entity.Actor;
 import com.iemdb.Entity.Comment;
 import com.iemdb.Entity.Movie;
 import com.iemdb.Entity.User;
+import com.iemdb.Repository.ActorRepository;
 import org.json.simple.JSONArray;
 import org.json.simple.parser.JSONParser;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
+import org.springframework.context.annotation.Configuration;
+
 
 public class Initializer {
 
@@ -26,11 +29,13 @@ public class Initializer {
     private DataBase dataBase;
     private JSONParser jsonParser;
 
+    private ActorRepository actorRepository;
 
-    public Initializer(DataBase dataBase) {
+    public Initializer(DataBase dataBase, ActorRepository actorRepository) {
         this.dataBase = dataBase;
         objectMapper = new ObjectMapper();
         jsonParser = new JSONParser();
+        this.actorRepository = actorRepository;
     }
 
     public void getDataFromAPI() {
@@ -89,7 +94,10 @@ public class Initializer {
     private void addActor(String json) throws Exception {
         AddActorCommand addActorCommand = new AddActorCommand();
         addActorCommand.execute(json, objectMapper);
-        dataBase.addActor(objectMapper.readValue(json, Actor.class));
+        Actor actor = objectMapper.readValue(json, Actor.class);
+        dataBase.addActor(actor);
+        actorRepository.save(actor);
+        System.out.println("added actor " + actor.getName() + " to repository.");
     }
 
     private void addMovie(String json) throws Exception {
