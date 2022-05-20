@@ -7,10 +7,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import javax.persistence.Column;
-import javax.persistence.ElementCollection;
-import javax.persistence.Entity;
-import javax.persistence.Id;
+import javax.persistence.*;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Date;
@@ -40,7 +37,8 @@ public class Movie {
     private double imdbRate;
     private long duration;
     private int ageLimit;
-//    private List<Comment> comments;
+    @OneToMany
+    private List<Comment> comments;
     @ElementCollection
     private List<String> user;
     @ElementCollection

@@ -4,23 +4,34 @@ package com.iemdb.Entity;
 import com.iemdb.exception.AgeLimitError;
 import com.iemdb.exception.MovieAlreadyExists;
 import com.iemdb.exception.MovieNotFound;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.ManyToMany;
 import java.lang.reflect.Field;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
+@Entity
+@AllArgsConstructor
+@NoArgsConstructor
+@Setter
+@Getter
 public class User {
+    @Id
     private String email;
     private String password;
     private String nickname;
     private String name;
     private LocalDate birthDate;
+    @ManyToMany
     private List<Movie> watchList;
-
-    public User() {
-    }
 
     public User(String email, String password, String nickname, String name, LocalDate birthDate) {
         this.email = email;
@@ -30,41 +41,6 @@ public class User {
         this.birthDate = birthDate;
     }
 
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
-    public String getNickname() {
-        return nickname;
-    }
-
-    public void setNickname(String nickname) {
-        this.nickname = nickname;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public LocalDate getBirthDate() {
-        return birthDate;
-    }
 
     public void setBirthDate(String birthDate) {
         this.birthDate = LocalDate.parse(birthDate, DateTimeFormatter.ofPattern("yyyy-MM-dd"));

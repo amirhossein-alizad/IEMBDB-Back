@@ -7,6 +7,7 @@ import com.iemdb.Entity.Comment;
 import com.iemdb.Entity.Movie;
 import com.iemdb.Entity.User;
 import com.iemdb.Repository.ActorRepository;
+import com.iemdb.Repository.CommentRepository;
 import com.iemdb.Repository.MovieRepository;
 import com.iemdb.exception.AgeLimitError;
 import com.iemdb.exception.CommentNotFound;
@@ -27,10 +28,13 @@ public class DataBase {
 
     ActorRepository actorRepository;
     MovieRepository movieRepository;
+    CommentRepository commentRepository;
 
-    public DataBase(ActorRepository actorRepository, MovieRepository movieRepository) {
+    public DataBase(ActorRepository actorRepository, MovieRepository movieRepository,
+                    CommentRepository commentRepository) {
         this.actorRepository = actorRepository;
         this.movieRepository = movieRepository;
+        this.commentRepository = commentRepository;
         actors = new ArrayList<>();
         movies = new ArrayList<>();
         users = new ArrayList<>();

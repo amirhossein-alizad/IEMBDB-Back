@@ -3,7 +3,9 @@ package com.iemdb.model;
 import com.iemdb.Entity.*;
 import com.iemdb.Repository.ActorRepository;
 //import com.iemdb.Repository.CommentRepository;
+import com.iemdb.Repository.CommentRepository;
 import com.iemdb.Repository.MovieRepository;
+import com.iemdb.Repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 
@@ -19,15 +21,20 @@ public class IEMovieDataBase {
     private ActorRepository actorRepository;
     @Autowired
     private MovieRepository movieRepository;
-//    @Autowired
-//    private CommentRepository commentRepository;
+    @Autowired
+    private CommentRepository commentRepository;
+    @Autowired
+    private UserRepository userRepository;
     private static IEMovieDataBase instance;
 
-    IEMovieDataBase(ActorRepository actorRepository, MovieRepository movieRepository){
+    IEMovieDataBase(ActorRepository actorRepository, MovieRepository movieRepository, CommentRepository commentRepository,
+                    UserRepository userRepository){
         this.movieRepository = movieRepository;
         this.actorRepository = actorRepository;
-        dataBase = new DataBase(actorRepository, movieRepository);
-        initializer = new Initializer(dataBase, actorRepository, movieRepository);
+        this.commentRepository = commentRepository;
+        this.userRepository = userRepository;
+        dataBase = new DataBase(actorRepository, movieRepository, commentRepository);
+        initializer = new Initializer(dataBase, actorRepository, movieRepository, commentRepository, userRepository);
         initializer.getDataFromAPI();
     }
 

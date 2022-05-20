@@ -3,99 +3,66 @@ package com.iemdb.Entity;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.iemdb.Domain.CommentVote;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
+import javax.persistence.*;
 import java.lang.reflect.Field;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+@Entity
+@AllArgsConstructor
+@NoArgsConstructor
+@Getter
 public class Comment {
-    private static int commentCount = 1;
     private String userEmail;
     private int movieId;
     private String text;
-    private int id;
-    private LocalDateTime time;
-    private int like;
-    private int dislike;
-    private List<String> users;
-    private List<Integer> votes;
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    private Integer id;
 
-    public Comment() {
-    }
+    private LocalDateTime time;
+    private int like = 0;
+    private int dislike = 0;
+    @ElementCollection
+    private List<String> users;
+    @ElementCollection
+    private List<Integer> votes;
 
     public Comment(String userEmail, int movieId, String text) {
         this.userEmail = userEmail;
         this.movieId = movieId;
         this.text = text;
-        this.id = commentCount;
-        commentCount++;
         this.time = LocalDateTime.now();
     }
 
-    public static int getCommentCount() {
-        return commentCount;
-    }
-
-    public static void setCommentCount(int commentCount) {
-        Comment.commentCount = commentCount;
-    }
-
-    public String getUserEmail() {
-        return userEmail;
-    }
 
     public void setUserEmail(String userEmail) {
         this.userEmail = userEmail;
-    }
-
-    public int getMovieId() {
-        return movieId;
     }
 
     public void setMovieId(int movieId) {
         this.movieId = movieId;
     }
 
-    public String getText() {
-        return text;
-    }
-
     public void setText(String text) {
         this.text = text;
-    }
-
-    public void setId() {
-        this.id = commentCount;
-        commentCount++;
     }
 
     public void setTime() {
         this.time = LocalDateTime.now();
     }
 
-    public int getId() {
-        return id;
-    }
-
-    public LocalDateTime getTime() {
-        return time;
-    }
-
-    public int getLike() {
-        return like;
-    }
-
-    public int getDislike() {
-        return dislike;
-    }
-
     public boolean checkNull() throws IllegalAccessException {
         for (Field f : getClass().getDeclaredFields()) {
             String fieldName = f.getName();
             if (fieldName.equals("time") || fieldName.equals("users")
-                    || fieldName.equals("votes"))
+                    || fieldName.equals("votes") || fieldName.equals("id"))
                 continue;
             if (f.get(this) == null)
                 return true;
@@ -116,17 +83,6 @@ public class Comment {
         }
         like = Collections.frequency(votes, 1);
         dislike = Collections.frequency(votes, -1);
-    }
-
-    public ObjectNode serialize() {
-        ObjectMapper mapper = new ObjectMapper();
-        ObjectNode serialized_comment = mapper.createObjectNode();
-        serialized_comment.put("commentId", getId());
-        serialized_comment.put("userEmail", getUserEmail());
-        serialized_comment.put("text", getText());
-        serialized_comment.put("like", getLike());
-        serialized_comment.put("dislike", getDislike());
-        return serialized_comment;
     }
 
 }

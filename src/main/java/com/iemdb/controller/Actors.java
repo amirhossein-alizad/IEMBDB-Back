@@ -3,6 +3,7 @@ package com.iemdb.controller;
 import com.iemdb.Entity.Actor;
 import com.iemdb.Entity.Movie;
 import com.iemdb.Repository.ActorRepository;
+import com.iemdb.Repository.MovieRepository;
 import com.iemdb.model.IEMovieDataBase;
 import com.iemdb.utils.Utils;
 import lombok.AllArgsConstructor;
@@ -24,6 +25,7 @@ import java.util.stream.StreamSupport;
 public class Actors {
 
     private ActorRepository actorRepository;
+    private MovieRepository movieRepository;
 
     @GetMapping("/actors")
     public List<Actor> getActors() {
@@ -38,18 +40,18 @@ public class Actors {
         return actor.map(value -> new ResponseEntity<>(value, HttpStatus.OK)).orElseGet(() -> new ResponseEntity<>(null, HttpStatus.NOT_FOUND));
     }
 
-//    @GetMapping("/actors/{id}/movies")
-//    public ResponseEntity<List<Movie>> getActorMovies(@PathVariable int id) {
-//        Utils.wait(2000);
-//        try {
-//            Optional<Actor> optionalActor = actorRepository.findById(id);
-//            if (optionalActor.isEmpty())
-//                return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
-//            Actor actor = optionalActor.get();
-//            List<Movie> movies = IEMovieDataBase.getInstance().getActorMovies(id);
-//            return new ResponseEntity<>(movies, HttpStatus.OK);
-//        } catch (Exception e) {
-//            return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
-//        }
-//    }
+    @GetMapping("/actors/{id}/movies")
+    public ResponseEntity<List<Movie>> getActorMovies(@PathVariable int id) {
+        Utils.wait(2000);
+        try {
+            Optional<Actor> optionalActor = actorRepository.findById(id);
+            if (optionalActor.isEmpty())
+                return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
+            Actor actor = optionalActor.get();
+            List<Movie> movies = movieRepository.findAllByCast(actor.getId());
+            return new ResponseEntity<>(movies, HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
+        }
+    }
 }
