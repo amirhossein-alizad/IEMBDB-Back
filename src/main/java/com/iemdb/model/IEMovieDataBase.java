@@ -30,7 +30,8 @@ public class IEMovieDataBase {
 //    private CommentRepository commentRepository;
     private static IEMovieDataBase instance;
 
-    IEMovieDataBase(){
+    IEMovieDataBase(ActorRepository actorRepository){
+        this.actorRepository = actorRepository;
         dataBase = new DataBase();
         initializer = new Initializer(dataBase, actorRepository);
         initializer.getDataFromAPI();

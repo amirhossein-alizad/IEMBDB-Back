@@ -29,6 +29,7 @@ public class Initializer {
     private DataBase dataBase;
     private JSONParser jsonParser;
 
+
     private ActorRepository actorRepository;
 
     public Initializer(DataBase dataBase, ActorRepository actorRepository) {
@@ -96,7 +97,11 @@ public class Initializer {
         addActorCommand.execute(json, objectMapper);
         Actor actor = objectMapper.readValue(json, Actor.class);
         dataBase.addActor(actor);
-//        actorRepository.save(actor);
+        try {
+            actorRepository.save(actor);
+        } catch(Exception e){
+            System.out.println(e.getMessage());
+        }
         System.out.println("added actor " + actor.getName() + " to repository.");
 
     }
