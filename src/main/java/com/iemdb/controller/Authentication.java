@@ -42,6 +42,7 @@ public class Authentication {
             if (!user.getPassword().equals(password)) {
                 throw new UserNotFound();
             }
+            IEMovieDataBase.getInstance().setCurrentUser(user);
             String jwt = createToken(user.getEmail());
             ObjectMapper objectMapper = new ObjectMapper();
             ObjectNode resp = objectMapper.createObjectNode();
@@ -76,7 +77,7 @@ public class Authentication {
             String name = input.get("name");
             String nickname = input.get("nickname");
             User user = IEMovieDataBase.getInstance().addUser(email, password, name, nickname, birthdate);
-//            IEMovieDataBase.getInstance().setCurrentUser(user);
+            IEMovieDataBase.getInstance().setCurrentUser(user);
             String jwt = createToken(user.getEmail());
             ObjectMapper objectMapper = new ObjectMapper();
             ObjectNode resp = objectMapper.createObjectNode();
@@ -113,12 +114,12 @@ public class Authentication {
         }
     }
 
-//    @GetMapping("/callback")
-//    public ResponseEntity<String> callback(@RequestParam("code") String code) {
-//        Utils.wait(2000);
-//        System.out.println(code);
-//        return new ResponseEntity<>(code, HttpStatus.OK);
-//    }
+    @GetMapping("/callback")
+    public ResponseEntity<String> callback(@RequestParam("code") String code) {
+        Utils.wait(2000);
+        System.out.println(code);
+        return new ResponseEntity<>(code, HttpStatus.OK);
+    }
 
     private String createToken(String user) {
         Calendar c = Calendar.getInstance();
