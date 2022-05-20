@@ -113,12 +113,12 @@ public class Authentication {
         }
     }
 
-    @GetMapping("/callback")
-    public ResponseEntity<String> callback(@RequestParam("code") String code) {
-        Utils.wait(2000);
-        System.out.println(code);
-        return new ResponseEntity<>(code, HttpStatus.OK);
-    }
+//    @GetMapping("/callback")
+//    public ResponseEntity<String> callback(@RequestParam("code") String code) {
+//        Utils.wait(2000);
+//        System.out.println(code);
+//        return new ResponseEntity<>(code, HttpStatus.OK);
+//    }
 
     private String createToken(String user) {
         Calendar c = Calendar.getInstance();

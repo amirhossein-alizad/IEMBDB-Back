@@ -30,7 +30,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.core.annotation.Order;
 
 @Component
-@Order(2)
+//@Order(2)
 public class AuthFilter implements Filter {
     @Override
     public void destroy() {}
