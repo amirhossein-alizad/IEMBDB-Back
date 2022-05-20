@@ -10,11 +10,11 @@ import com.iemdb.Entity.Comment;
 import com.iemdb.Entity.Movie;
 import com.iemdb.Entity.User;
 import com.iemdb.Repository.ActorRepository;
+import com.iemdb.Repository.MovieRepository;
 import org.json.simple.JSONArray;
 import org.json.simple.parser.JSONParser;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
-import org.springframework.context.annotation.Configuration;
 
 
 public class Initializer {
@@ -31,12 +31,14 @@ public class Initializer {
 
 
     private ActorRepository actorRepository;
+    private MovieRepository movieRepository;
 
-    public Initializer(DataBase dataBase, ActorRepository actorRepository) {
+    public Initializer(DataBase dataBase, ActorRepository actorRepository, MovieRepository movieRepository) {
         this.dataBase = dataBase;
         objectMapper = new ObjectMapper();
         jsonParser = new JSONParser();
         this.actorRepository = actorRepository;
+        this.movieRepository = movieRepository;
     }
 
     public void getDataFromAPI() {
@@ -97,12 +99,7 @@ public class Initializer {
         addActorCommand.execute(json, objectMapper);
         Actor actor = objectMapper.readValue(json, Actor.class);
         dataBase.addActor(actor);
-        try {
-            actorRepository.save(actor);
-        } catch(Exception e){
-            System.out.println(e.getMessage());
-        }
-        System.out.println("added actor " + actor.getName() + " to repository.");
+        actorRepository.save(actor);
 
     }
 
@@ -112,6 +109,7 @@ public class Initializer {
         Movie movie = objectMapper.readValue(json, Movie.class);
         addMovieCommand.checkActors(dataBase.getActors(), movie.getCast());
         dataBase.addMovie(movie);
+        movieRepository.save(movie);
     }
 
     private void addUser(String json) throws Exception {
