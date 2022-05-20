@@ -27,31 +27,35 @@ import java.util.Map;
 @RestController
 @CrossOrigin(origins = "*", allowedHeaders = "*")
 public class Authentication {
-    private String KEY = "iemdb1401iemdb1401iemdb1401iemdb1401";
+
+    public static String KEY = "iemdb1401iemdb1401iemdb1401iemdb1401";
+
     @PostMapping("/login")
     public ResponseEntity<JsonNode> login(@RequestBody Map<String, String> input) {
         Utils.wait(2000);
-        String username = input.get("username");
-        String jwt = createToken(username);
-        ObjectMapper objectMapper = new ObjectMapper();
-        ObjectNode resp = objectMapper.createObjectNode();
-        resp.put("token", jwt);
-        return new ResponseEntity<>(resp, HttpStatus.OK);
-//        try {
-//            String username = input.get("username");
-//            String password = input.get("password");
-//            User user = IEMovieDataBase.getInstance().getUser(username);
-//            IEMovieDataBase.getInstance().setCurrentUser(user);
-//            String jwt = createToken(user.getEmail());
-//            ObjectMapper objectMapper = new ObjectMapper();
-//            ObjectNode resp = objectMapper.createObjectNode();
-//            resp.put("token", jwt);
-//            return new ResponseEntity<>(resp, HttpStatus.OK);
-//        } catch (UserNotFound e) {
-//            return new ResponseEntity<>(null, e.getStatusCode());
-//        } catch (Exception e) {
-//            return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
-//        }
+        try {
+            String username = input.get("username");
+            String password = input.get("password");
+            User user = IEMovieDataBase.getInstance().getUser(username);
+            if (!user.getPassword().equals(password)) {
+                throw new UserNotFound();
+            }
+            String jwt = createToken(user.getEmail());
+            ObjectMapper objectMapper = new ObjectMapper();
+            ObjectNode resp = objectMapper.createObjectNode();
+            resp.put("token", jwt);
+            return new ResponseEntity<>(resp, HttpStatus.OK);
+        } catch (UserNotFound e) {
+            ObjectMapper objectMapper = new ObjectMapper();
+            ObjectNode resp = objectMapper.createObjectNode();
+            resp.put("error", e.getMessage());
+            return new ResponseEntity<>(resp, e.getStatusCode());
+        } catch (Exception e) {
+            ObjectMapper objectMapper = new ObjectMapper();
+            ObjectNode resp = objectMapper.createObjectNode();
+            resp.put("error", e.getMessage());
+            return new ResponseEntity<>(resp, HttpStatus.BAD_REQUEST);
+        }
     }
 
     @PostMapping("/signup")

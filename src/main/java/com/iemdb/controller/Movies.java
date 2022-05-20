@@ -5,11 +5,15 @@ import com.iemdb.exception.MovieNotFound;
 import com.iemdb.exception.RestException;
 import com.iemdb.model.IEMovieDataBase;
 import com.iemdb.utils.Utils;
+import com.sun.source.tree.CatchTree;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.Map;
 
@@ -20,6 +24,13 @@ public class Movies {
     @GetMapping("/movies")
     public List<Movie> getMovies() {
         Utils.wait(2000);
+        HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
+        try {
+            User user = (User) request.getAttribute("user");
+            System.out.println(user.getEmail());
+        } catch (Exception e) {
+            System.out.println("error occured: " + e.getMessage());
+        }
         return IEMovieDataBase.getInstance().getMoviesByFilter("", false);
     }
 
