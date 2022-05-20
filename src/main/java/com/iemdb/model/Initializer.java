@@ -96,8 +96,9 @@ public class Initializer {
         addActorCommand.execute(json, objectMapper);
         Actor actor = objectMapper.readValue(json, Actor.class);
         dataBase.addActor(actor);
-        actorRepository.save(actor);
+//        actorRepository.save(actor);
         System.out.println("added actor " + actor.getName() + " to repository.");
+
     }
 
     private void addMovie(String json) throws Exception {
