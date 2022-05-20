@@ -23,6 +23,8 @@ import java.time.format.DateTimeFormatter;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Map;
+import org.springframework.http.HttpStatus;
+
 
 @RestController
 @CrossOrigin(origins = "*", allowedHeaders = "*")
@@ -59,7 +61,7 @@ public class Authentication {
     }
 
     @PostMapping("/signup")
-    public ResponseEntity<String> signup(@RequestBody Map<String, String> input) {
+    public ResponseEntity<JsonNode> signup(@RequestBody Map<String, String> input) {
         Utils.wait(2000);
         try {
             input.computeIfAbsent("email", key -> {throw new RuntimeException(key + " not found!");});
@@ -74,13 +76,23 @@ public class Authentication {
             String name = input.get("name");
             String nickname = input.get("nickname");
             User user = IEMovieDataBase.getInstance().addUser(email, password, name, nickname, birthdate);
-            IEMovieDataBase.getInstance().setCurrentUser(user);
+//            IEMovieDataBase.getInstance().setCurrentUser(user);
+            String jwt = createToken(user.getEmail());
+            ObjectMapper objectMapper = new ObjectMapper();
+            ObjectNode resp = objectMapper.createObjectNode();
+            resp.put("token", jwt);
+            return new ResponseEntity<>(resp, HttpStatus.OK);
         } catch (RestException e) {
-            return new ResponseEntity<>(e.getMessage(), e.getStatusCode());
+            ObjectMapper objectMapper = new ObjectMapper();
+            ObjectNode resp = objectMapper.createObjectNode();
+            resp.put("error", e.getMessage());
+            return new ResponseEntity<>(resp, HttpStatus.OK);
         } catch (Exception e) {
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+            ObjectMapper objectMapper = new ObjectMapper();
+            ObjectNode resp = objectMapper.createObjectNode();
+            resp.put("error", e.getMessage());
+            return new ResponseEntity<>(resp, HttpStatus.OK);
         }
-        return new ResponseEntity<>("You signed up successfully!", HttpStatus.OK);
     }
 
     @PostMapping("/logout")
@@ -99,6 +111,13 @@ public class Authentication {
         } catch (RestException e) {
             return new ResponseEntity<>(null, e.getStatusCode());
         }
+    }
+
+    @GetMapping("/callback")
+    public ResponseEntity<String> callback(@RequestParam("code") String code) {
+        Utils.wait(2000);
+        System.out.println(code);
+        return new ResponseEntity<>(code, HttpStatus.OK);
     }
 
     private String createToken(String user) {
