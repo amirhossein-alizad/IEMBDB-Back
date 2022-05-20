@@ -1,7 +1,10 @@
 package com.iemdb.Domain;
 
+import lombok.AllArgsConstructor;
+
 import java.lang.reflect.Field;
 
+@AllArgsConstructor
 public class CommentVote {
     private String userEmail;
     private int commentId;

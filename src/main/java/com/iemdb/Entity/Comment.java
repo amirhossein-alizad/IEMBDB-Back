@@ -71,10 +71,10 @@ public class Comment {
     }
 
     public void addVote(CommentVote commentVote) {
-        if (users == null)
+        if (users == null) {
             users = new ArrayList<>();
-        if (votes == null)
             votes = new ArrayList<>();
+        }
         if (users.contains(commentVote.getUserEmail()))
             votes.set(users.indexOf(commentVote.getUserEmail()), commentVote.getVote());
         else {

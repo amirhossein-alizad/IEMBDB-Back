@@ -161,15 +161,15 @@ public class DataBase {
 
 //    }
 
-//    public void rateMovie(MovieRating movieRating) throws MovieNotFound {
-//        for (Movie movie : movies) {
-//            if (movie.getId() == movieRating.getMovieId()) {
-//                movie.addRating(movieRating);
-//                return;
-//            }
-//        }
-//        throw new MovieNotFound();
-//    }
+    public void rateMovie(MovieRating movieRating) throws MovieNotFound {
+        for (Movie movie : movies) {
+            if (movie.getId() == movieRating.getMovieId()) {
+                movie.addRating(movieRating);
+                return;
+            }
+        }
+        throw new MovieNotFound();
+    }
 
     public void voteComment(CommentVote commentVote) throws CommentNotFound{
         for (Comment comment : comments) {

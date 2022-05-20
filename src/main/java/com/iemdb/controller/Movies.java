@@ -1,11 +1,15 @@
 package com.iemdb.controller;
 
+import com.iemdb.Domain.MovieRating;
 import com.iemdb.Entity.*;
 import com.iemdb.Repository.ActorRepository;
 import com.iemdb.Repository.CommentRepository;
 import com.iemdb.Repository.MovieRepository;
+import com.iemdb.Repository.UserRepository;
+import com.iemdb.exception.LoginRequired;
 import com.iemdb.exception.MovieNotFound;
 import com.iemdb.exception.RestException;
+import com.iemdb.model.CurrentUser;
 import com.iemdb.model.IEMovieDataBase;
 import com.iemdb.utils.Utils;
 import lombok.AllArgsConstructor;
@@ -28,6 +32,7 @@ public class Movies {
     private MovieRepository movieRepository;
     private ActorRepository actorRepository;
     private CommentRepository commentRepository;
+    private UserRepository userRepository;
 
     @GetMapping("/movies")
     public List<Movie> getMovies() {
@@ -78,38 +83,51 @@ public class Movies {
 //        }
 //    }
 //
-//    @PostMapping("/movies/{id}/rate")
-//    public ResponseEntity<String> rateMovie(@PathVariable int id, @RequestBody Map<String, String> input) {
-//        Utils.wait(2000);
-//        try {
-//            User user = IEMovieDataBase.getInstance().getCurrentUser();
-//            int rate = Integer.parseInt(input.get("quantity"));
-//            IEMovieDataBase.getInstance().rateMovie(user.getEmail(), id, rate);
-//            return new ResponseEntity<>("Movie rated successfully!", HttpStatus.OK);
-//        } catch (RestException e) {
-//            return new ResponseEntity<>(e.getMessage(), e.getStatusCode());
-//        } catch (Exception e) {
-//            System.out.println(e);
-//            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
-//        }
-//    }
-//
-//    @PostMapping("/movies/{id}/comments")
-//    public ResponseEntity<String> commentOnMovie(@PathVariable int id, @RequestBody Map<String, String> input) {
-//        Utils.wait(2000);
-//        try {
-//            input.computeIfAbsent("comment", key -> {throw new RuntimeException(key + " not found!");});
-//            User user = IEMovieDataBase.getInstance().getCurrentUser();
-//            String comment = input.get("comment");
-//            IEMovieDataBase.getInstance().addComment(id, user.getEmail(), comment);
-//            return new ResponseEntity<>("Comment added successfully!", HttpStatus.OK);
-//        } catch (RestException e) {
-//            return new ResponseEntity<>(e.getMessage(), e.getStatusCode());
-//        } catch (Exception e) {
-//            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
-//        }
-//    }
-//
+    @PostMapping("/movies/{id}/rate")
+    public ResponseEntity<String> rateMovie(@PathVariable int id, @RequestBody Map<String, String> input) {
+        Utils.wait(2000);
+        try {
+            Optional<User> user = userRepository.findById(CurrentUser.username);
+            if(user.isEmpty())
+                throw new LoginRequired();
+            Optional<Movie> movie = movieRepository.findById(id);
+            if(movie.isEmpty())
+                throw new MovieNotFound();
+            int rate = Integer.parseInt(input.get("quantity"));
+            Movie movie1 = movie.get();
+            movie1.addRating(new MovieRating(user.get().getEmail(), id, rate));
+            movieRepository.save(movie1);
+            return new ResponseEntity<>("Movie rated successfully!", HttpStatus.OK);
+        } catch (RestException e) {
+            return new ResponseEntity<>(e.getMessage(), e.getStatusCode());
+        } catch (Exception e) {
+            System.out.println(e);
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @PostMapping("/movies/{id}/comments")
+    public ResponseEntity<String> commentOnMovie(@PathVariable int id, @RequestBody Map<String, String> input) {
+        Utils.wait(2000);
+        try {
+            input.computeIfAbsent("comment", key -> {throw new RuntimeException(key + " not found!");});
+            Optional<User> user = userRepository.findById(CurrentUser.username);
+            if(user.isEmpty())
+                throw new LoginRequired();
+            String comment = input.get("comment");
+            Optional<Movie> movie = movieRepository.findById(id);
+            if(movie.isEmpty())
+                throw new MovieNotFound();
+            Comment newComment = new Comment(user.get().getEmail(), id, comment);
+            commentRepository.save(newComment);
+            return new ResponseEntity<>("Comment added successfully!", HttpStatus.OK);
+        } catch (RestException e) {
+            return new ResponseEntity<>(e.getMessage(), e.getStatusCode());
+        } catch (Exception e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+        }
+    }
+
     @GetMapping("/movies/{id}/comments")
     public ResponseEntity<List<Comment>> getMovieComments(@PathVariable int id) {
         Utils.wait(2000);

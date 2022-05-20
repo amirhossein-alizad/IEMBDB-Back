@@ -5,6 +5,7 @@ import com.iemdb.Repository.UserRepository;
 import com.iemdb.exception.RestException;
 import com.iemdb.exception.UserAlreadyExists;
 import com.iemdb.exception.UserNotFound;
+import com.iemdb.model.CurrentUser;
 import com.iemdb.model.IEMovieDataBase;
 import com.iemdb.utils.Utils;
 import lombok.AllArgsConstructor;
@@ -38,6 +39,7 @@ public class Authentication {
             if(!user.get().getEmail().equals(username)
             || !user.get().getPassword().equals(password))
                 throw new RuntimeException();
+            CurrentUser.username = username;
             return new ResponseEntity<>(user.get(), HttpStatus.OK);
         } catch (UserNotFound e) {
             return new ResponseEntity<>(null, e.getStatusCode());
@@ -62,6 +64,7 @@ public class Authentication {
             String name = input.get("name");
             String nickname = input.get("nickname");
             User user = new User(email, password, nickname, name, birthdate);
+            CurrentUser.username = user.getEmail();
             userRepository.save(user);
         } catch (Exception e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
@@ -72,7 +75,7 @@ public class Authentication {
     @PostMapping("/logout")
     public ResponseEntity<String> logout() {
         Utils.wait(2000);
-//        IEMovieDataBase.getInstance().setCurrentUser(null);
+        CurrentUser.username = "";
         return new ResponseEntity<>("You logged out successfully!", HttpStatus.OK);
     }
 

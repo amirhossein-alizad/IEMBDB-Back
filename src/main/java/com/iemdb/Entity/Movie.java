@@ -59,19 +59,19 @@ public class Movie {
         return false;
     }
 //
-//    public void addRating(MovieRating movieRating) {
-//        if (user == null)
-//            user = new ArrayList<>();
-//        if (userRating == null)
-//            userRating = new ArrayList<>();
-//        if (user.contains(movieRating.getUserEmail()))
-//            userRating.set(user.indexOf(movieRating.getUserEmail()), movieRating.getScore());
-//        else {
-//            userRating.add(movieRating.getScore());
-//            user.add(movieRating.getUserEmail());
-//        }
-//        rating = userRating.stream().mapToDouble(Integer::intValue).sum() / userRating.size();
-//    }
+    public void addRating(MovieRating movieRating) {
+        if (user == null)
+            user = new ArrayList<>();
+        if (userRating == null)
+            userRating = new ArrayList<>();
+        if (user.contains(movieRating.getUserEmail()))
+            userRating.set(user.indexOf(movieRating.getUserEmail()), movieRating.getScore());
+        else {
+            userRating.add(movieRating.getScore());
+            user.add(movieRating.getUserEmail());
+        }
+        rating = userRating.stream().mapToDouble(Integer::intValue).sum() / userRating.size();
+    }
 //
 //    private int getNumberOfSimilarGenres(Movie movie) {
 //        List<String> genres = getGenres();

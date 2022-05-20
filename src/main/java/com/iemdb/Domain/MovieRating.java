@@ -1,9 +1,11 @@
 package com.iemdb.Domain;
 
 import com.iemdb.exception.InvalidRateScore;
+import lombok.AllArgsConstructor;
 
 import java.lang.reflect.Field;
 
+@AllArgsConstructor
 public class MovieRating {
     private String userEmail;
     private int movieId;
