@@ -1,33 +1,46 @@
 package com.iemdb.controller;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.iemdb.Entity.User;
 import com.iemdb.exception.RestException;
 import com.iemdb.exception.UserAlreadyExists;
 import com.iemdb.exception.UserNotFound;
 import com.iemdb.model.IEMovieDataBase;
 import com.iemdb.utils.Utils;
+import io.jsonwebtoken.Jwts;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
+import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.Map;
 
 @RestController
 @CrossOrigin(origins = "*", allowedHeaders = "*")
 public class Authentication {
-
+    private String KEY = "iemdb1401";
     @PostMapping("/login")
-    public ResponseEntity<User> login(@RequestBody Map<String, String> input) {
+    public ResponseEntity<JsonNode> login(@RequestBody Map<String, String> input) {
         Utils.wait(2000);
         try {
             String username = input.get("username");
             String password = input.get("password");
             User user = IEMovieDataBase.getInstance().getUser(username);
             IEMovieDataBase.getInstance().setCurrentUser(user);
-            return new ResponseEntity<>(user, HttpStatus.OK);
+            String jwt = createToken(user.getEmail());
+            ObjectMapper objectMapper = new ObjectMapper();
+            ObjectNode resp = objectMapper.createObjectNode();
+            resp.put("token", jwt);
+            return new ResponseEntity<>(resp, HttpStatus.OK);
         } catch (UserNotFound e) {
             return new ResponseEntity<>(null, e.getStatusCode());
         } catch (Exception e) {
@@ -76,5 +89,23 @@ public class Authentication {
         } catch (RestException e) {
             return new ResponseEntity<>(null, e.getStatusCode());
         }
+    }
+
+    private String createToken(String user) {
+        Calendar c = Calendar.getInstance();
+        c.add(Calendar.DAY_OF_MONTH, 1);
+        Date exp = c.getTime();
+
+        SecretKey key = new SecretKeySpec(KEY.getBytes(StandardCharsets.UTF_8), "HmacSHA256");
+        String jws = Jwts.builder()
+                .signWith(key)
+                .setHeaderParam("typ", "JWT")
+                .setIssuer("IEMDB.ir")
+                .setIssuedAt(new Date())
+                .setExpiration(exp)
+                .claim("user", user)
+                .compact();
+
+        return jws;
     }
 }
