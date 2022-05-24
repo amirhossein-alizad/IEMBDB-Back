@@ -27,7 +27,7 @@ public class Movies {
         HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
         try {
             User user = (User) request.getAttribute("user");
-            System.out.println(user.getEmail());
+//            System.out.println(user.getEmail());
         } catch (Exception e) {
             System.out.println("error occured: " + e.getMessage());
         }

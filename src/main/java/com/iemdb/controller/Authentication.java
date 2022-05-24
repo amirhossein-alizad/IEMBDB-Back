@@ -10,6 +10,7 @@ import com.iemdb.exception.UserNotFound;
 import com.iemdb.model.IEMovieDataBase;
 import com.iemdb.utils.Utils;
 import io.jsonwebtoken.Jwts;
+import org.json.simple.JSONObject;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -17,11 +18,16 @@ import org.springframework.web.server.ResponseStatusException;
 
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Map;
 import org.springframework.http.HttpStatus;
 
@@ -118,6 +124,36 @@ public class Authentication {
     public ResponseEntity<String> callback(@RequestParam("code") String code) {
         Utils.wait(2000);
         System.out.println(code);
+
+        try {
+            String url = String.format("https://github.com/login/oauth/access_token?client_id=f91cb2bad21d5c303ca9&client_secret=68ccc847fdb4e0e7f214a3ac5462385fd48cae25&code=%s", code);
+            System.out.println(url);
+            HttpClient client = HttpClient.newHttpClient();
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(url))
+                    .POST(HttpRequest.BodyPublishers.noBody())
+                    .build();
+            HttpResponse<String> response = client.send(request,
+                    HttpResponse.BodyHandlers.ofString());
+            System.out.println(response.body());
+            String accessToken =response.body().split("[&=]")[1];
+            System.out.println(accessToken);
+            url = "https://api.github.com/user";
+            request = HttpRequest.newBuilder()
+                    .uri(URI.create(url))
+                    .GET()
+                    .header("Authorization", String.format("Bearer %s", accessToken))
+                    .build();
+            response = client.send(request, HttpResponse.BodyHandlers.ofString());
+            System.out.println(response.body());
+            ObjectMapper mapper = new ObjectMapper();
+            HashMap<String, String> json = mapper.readValue(response.body(), HashMap.class);
+            System.out.println(json.get("login"));
+        } catch (Exception e) {
+            System.out.println("mother fucker bitch");
+            System.out.println(e);
+        }
+
         return new ResponseEntity<>(code, HttpStatus.OK);
     }
 
