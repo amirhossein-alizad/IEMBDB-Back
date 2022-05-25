@@ -9,10 +9,15 @@ import com.iemdb.Entity.Actor;
 import com.iemdb.Entity.Comment;
 import com.iemdb.Entity.Movie;
 import com.iemdb.Entity.User;
+import com.iemdb.Repository.ActorRepository;
+import com.iemdb.Repository.CommentRepository;
+import com.iemdb.Repository.MovieRepository;
+import com.iemdb.Repository.UserRepository;
 import org.json.simple.JSONArray;
 import org.json.simple.parser.JSONParser;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
+
 
 public class Initializer {
 
@@ -27,10 +32,20 @@ public class Initializer {
     private JSONParser jsonParser;
 
 
-    public Initializer(DataBase dataBase) {
+    private final ActorRepository actorRepository;
+    private final MovieRepository movieRepository;
+    private final CommentRepository commentRepository;
+    private final UserRepository userRepository;
+
+    public Initializer(DataBase dataBase, ActorRepository actorRepository, MovieRepository movieRepository,
+                       CommentRepository commentRepository, UserRepository userRepository) {
         this.dataBase = dataBase;
+        this.commentRepository = commentRepository;
+        this.userRepository = userRepository;
         objectMapper = new ObjectMapper();
         jsonParser = new JSONParser();
+        this.actorRepository = actorRepository;
+        this.movieRepository = movieRepository;
     }
 
     public void getDataFromAPI() {
@@ -89,7 +104,10 @@ public class Initializer {
     private void addActor(String json) throws Exception {
         AddActorCommand addActorCommand = new AddActorCommand();
         addActorCommand.execute(json, objectMapper);
-        dataBase.addActor(objectMapper.readValue(json, Actor.class));
+        Actor actor = objectMapper.readValue(json, Actor.class);
+        dataBase.addActor(actor);
+        actorRepository.save(actor);
+
     }
 
     private void addMovie(String json) throws Exception {
@@ -98,12 +116,14 @@ public class Initializer {
         Movie movie = objectMapper.readValue(json, Movie.class);
         addMovieCommand.checkActors(dataBase.getActors(), movie.getCast());
         dataBase.addMovie(movie);
+        movieRepository.save(movie);
     }
 
     private void addUser(String json) throws Exception {
         AddUserCommand addUserCommand = new AddUserCommand();
         addUserCommand.execute(json, objectMapper);
         dataBase.addUser(objectMapper.readValue(json, User.class));
+        userRepository.save(objectMapper.readValue(json, User.class));
     }
 
     private void addComment(String json) throws Exception {
@@ -112,8 +132,7 @@ public class Initializer {
         Comment comment = objectMapper.readValue(json, Comment.class);
         addCommentCommand.checkMovie(dataBase.getMovies(), comment.getMovieId());
         addCommentCommand.checkUser(dataBase.getUsers(), comment.getUserEmail());
-        comment.setId();
-        comment.setTime();
         dataBase.addComment(comment);
+        commentRepository.save(comment);
     }
 }

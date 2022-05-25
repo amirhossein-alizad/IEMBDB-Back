@@ -4,13 +4,15 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.iemdb.Entity.User;
+import com.iemdb.Repository.UserRepository;
 import com.iemdb.exception.RestException;
 import com.iemdb.exception.UserAlreadyExists;
 import com.iemdb.exception.UserNotFound;
+import com.iemdb.model.CurrentUser;
 import com.iemdb.model.IEMovieDataBase;
 import com.iemdb.utils.Utils;
 import io.jsonwebtoken.Jwts;
-import org.json.simple.JSONObject;
+import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -30,13 +32,15 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import org.springframework.http.HttpStatus;
-
+import java.util.Optional;
 
 @RestController
+@AllArgsConstructor
 @CrossOrigin(origins = "*", allowedHeaders = "*")
 public class Authentication {
 
     public static String KEY = "iemdb1401iemdb1401iemdb1401iemdb1401";
+    UserRepository userRepository;
 
     @PostMapping("/login")
     public ResponseEntity<JsonNode> login(@RequestBody Map<String, String> input) {
@@ -44,16 +48,28 @@ public class Authentication {
         try {
             String username = input.get("username");
             String password = input.get("password");
-            User user = IEMovieDataBase.getInstance().getUser(username);
-            if (!user.getPassword().equals(password)) {
+//<<<<<<< HEAD
+//            User user = IEMovieDataBase.getInstance().getUser(username);
+//            if (!user.getPassword().equals(password)) {
+//                throw new UserNotFound();
+//            }
+//            IEMovieDataBase.getInstance().setCurrentUser(user);
+//            String jwt = createToken(user.getEmail());
+//            ObjectMapper objectMapper = new ObjectMapper();
+//            ObjectNode resp = objectMapper.createObjectNode();
+//            resp.put("token", jwt);
+//            return new ResponseEntity<>(resp, HttpStatus.OK);
+//=======
+            Optional<User> user = userRepository.findById(username);
+            if(user.isEmpty())
                 throw new UserNotFound();
-            }
-            IEMovieDataBase.getInstance().setCurrentUser(user);
-            String jwt = createToken(user.getEmail());
-            ObjectMapper objectMapper = new ObjectMapper();
-            ObjectNode resp = objectMapper.createObjectNode();
-            resp.put("token", jwt);
-            return new ResponseEntity<>(resp, HttpStatus.OK);
+            System.out.println();
+            if(!user.get().getEmail().equals(username)
+            || !user.get().getPassword().equals(password))
+                throw new RuntimeException();
+            CurrentUser.username = username;
+//            return new ResponseEntity<>(user.get(), HttpStatus.OK);
+            return new ResponseEntity<>(null, HttpStatus.OK);
         } catch (UserNotFound e) {
             ObjectMapper objectMapper = new ObjectMapper();
             ObjectNode resp = objectMapper.createObjectNode();
@@ -82,18 +98,24 @@ public class Authentication {
             LocalDate birthdate = LocalDate.parse(input.get("birthDate"), formatter);
             String name = input.get("name");
             String nickname = input.get("nickname");
-            User user = IEMovieDataBase.getInstance().addUser(email, password, name, nickname, birthdate);
-            IEMovieDataBase.getInstance().setCurrentUser(user);
-            String jwt = createToken(user.getEmail());
-            ObjectMapper objectMapper = new ObjectMapper();
-            ObjectNode resp = objectMapper.createObjectNode();
-            resp.put("token", jwt);
-            return new ResponseEntity<>(resp, HttpStatus.OK);
-        } catch (RestException e) {
-            ObjectMapper objectMapper = new ObjectMapper();
-            ObjectNode resp = objectMapper.createObjectNode();
-            resp.put("error", e.getMessage());
-            return new ResponseEntity<>(resp, HttpStatus.OK);
+//<<<<<<< HEAD
+//            User user = IEMovieDataBase.getInstance().addUser(email, password, name, nickname, birthdate);
+//            IEMovieDataBase.getInstance().setCurrentUser(user);
+//            String jwt = createToken(user.getEmail());
+//            ObjectMapper objectMapper = new ObjectMapper();
+//            ObjectNode resp = objectMapper.createObjectNode();
+//            resp.put("token", jwt);
+//            return new ResponseEntity<>(resp, HttpStatus.OK);
+//        } catch (RestException e) {
+//            ObjectMapper objectMapper = new ObjectMapper();
+//            ObjectNode resp = objectMapper.createObjectNode();
+//            resp.put("error", e.getMessage());
+//            return new ResponseEntity<>(resp, HttpStatus.OK);
+//=======
+            User user = new User(email, password, nickname, name, birthdate);
+            CurrentUser.username = user.getEmail();
+            userRepository.save(user);
+            return new ResponseEntity<>(null, HttpStatus.OK);
         } catch (Exception e) {
             ObjectMapper objectMapper = new ObjectMapper();
             ObjectNode resp = objectMapper.createObjectNode();
@@ -105,20 +127,20 @@ public class Authentication {
     @PostMapping("/logout")
     public ResponseEntity<String> logout() {
         Utils.wait(2000);
-        IEMovieDataBase.getInstance().setCurrentUser(null);
+        CurrentUser.username = "";
         return new ResponseEntity<>("You logged out successfully!", HttpStatus.OK);
     }
 
-    @GetMapping("/user")
-    public ResponseEntity<User> user() {
-        Utils.wait(2000);
-        try {
-            User user = IEMovieDataBase.getInstance().getCurrentUser();
-            return new ResponseEntity<>(user, HttpStatus.OK);
-        } catch (RestException e) {
-            return new ResponseEntity<>(null, e.getStatusCode());
-        }
-    }
+//    @GetMapping("/user")
+//    public ResponseEntity<User> user() {
+//        Utils.wait(2000);
+//        try {
+//            User user = IEMovieDataBase.getInstance().getCurrentUser();
+//            return new ResponseEntity<>(user, HttpStatus.OK);
+//        } catch (RestException e) {
+//            return new ResponseEntity<>(null, e.getStatusCode());
+//        }
+//    }
 
     @GetMapping("/callback")
     public ResponseEntity<String> callback(@RequestParam("code") String code) {

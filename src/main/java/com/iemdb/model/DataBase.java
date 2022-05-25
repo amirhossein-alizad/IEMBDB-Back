@@ -6,6 +6,9 @@ import com.iemdb.Entity.Actor;
 import com.iemdb.Entity.Comment;
 import com.iemdb.Entity.Movie;
 import com.iemdb.Entity.User;
+import com.iemdb.Repository.ActorRepository;
+import com.iemdb.Repository.CommentRepository;
+import com.iemdb.Repository.MovieRepository;
 import com.iemdb.exception.AgeLimitError;
 import com.iemdb.exception.CommentNotFound;
 import com.iemdb.exception.MovieAlreadyExists;
@@ -23,7 +26,15 @@ public class DataBase {
     private List<User> users;
     private List<Comment> comments;
 
-    public DataBase() {
+    ActorRepository actorRepository;
+    MovieRepository movieRepository;
+    CommentRepository commentRepository;
+
+    public DataBase(ActorRepository actorRepository, MovieRepository movieRepository,
+                    CommentRepository commentRepository) {
+        this.actorRepository = actorRepository;
+        this.movieRepository = movieRepository;
+        this.commentRepository = commentRepository;
         actors = new ArrayList<>();
         movies = new ArrayList<>();
         users = new ArrayList<>();
@@ -31,13 +42,14 @@ public class DataBase {
     }
 
     public void addActor(Actor actor) {
-        if (getActor(actor.getId()) == null)
+        if (getActor(actor.getId()) == null) {
             actors.add(actor);
+        }
         else {
             removeActor(actor.getId());
             actors.add(actor);
         }
-
+        actorRepository.save(actor);
     }
 
     public void addMovie(Movie movie) {
@@ -47,6 +59,7 @@ public class DataBase {
             removeMovie(movie.getId());
             movies.add(movie);
         }
+        movieRepository.save(movie);
     }
 
     public void addUser(User user) {
@@ -136,17 +149,17 @@ public class DataBase {
         return comments;
     }
 
-    public void addCommentToMovie(Comment comment, int movieId, String userEmail) {
-        Movie movie = getMovie(movieId);
-        List<Comment> comments = movie.getComments();
-        for (int i = 0; i < comments.size(); i++)
-            if (comments.get(i).getUserEmail().equals(userEmail)) {
-                comments.set(i, comment);
-                return;
-            }
-        movie.addComment(comment);
+//    public void addCommentToMovie(Comment comment, int movieId, String userEmail) {
+//        Movie movie = getMovie(movieId);
+//        List<Comment> comments = movie.getComments();
+//        for (int i = 0; i < comments.size(); i++)
+//            if (comments.get(i).getUserEmail().equals(userEmail)) {
+//                comments.set(i, comment);
+//                return;
+//            }
+//        movie.addComment(comment);
 
-    }
+//    }
 
     public void rateMovie(MovieRating movieRating) throws MovieNotFound {
         for (Movie movie : movies) {
