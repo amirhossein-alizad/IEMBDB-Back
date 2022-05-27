@@ -45,6 +45,7 @@ public class AuthFilter implements Filter {
             add("login");
             add("signup");
             add("callback");
+            add("movies");
         }
     };
 
@@ -81,16 +82,20 @@ public class AuthFilter implements Filter {
                 throw new JwtException("Token is expired");
             String username = jwsClaims.getBody().get("user", String.class);
             Optional<User> user = userRepository.findById(username);
-            request.setAttribute("user", user);
+            if (user.isEmpty()) {
+                ((HttpServletResponse) response).setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                response.getWriter().write("{\"error\": \"Incorrect or expired JWT\"}");
+                return;
+            }
+            User validUser = user.get();
+            request.setAttribute("user", validUser);
+            filterchain.doFilter(request, response);
         } catch (JwtException e) {
             System.out.println(e.getMessage());
             ((HttpServletResponse) response).setStatus(HttpServletResponse.SC_FORBIDDEN);
             response.getWriter().write("{\"error\": \"BAD JWT\"}");
             ((HttpServletResponse) response).setHeader("Content-Type", "application/json;charset=UTF-8");
-            return;
         }
-
-        filterchain.doFilter(request, response);
     }
 
     @Override
