@@ -21,7 +21,6 @@ import java.util.stream.StreamSupport;
 
 @AllArgsConstructor
 @RestController
-@CrossOrigin(origins = "*", allowedHeaders = "*")
 public class Actors {
 
     private ActorRepository actorRepository;
