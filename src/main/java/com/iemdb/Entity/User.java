@@ -15,8 +15,7 @@ import javax.persistence.ManyToMany;
 import java.lang.reflect.Field;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 @Entity
 @AllArgsConstructor
@@ -75,5 +74,33 @@ public class User {
             if (f.get(this) == null && !f.getName().equals("watchList"))
                 return true;
         return false;
+    }
+
+    public List<Movie> getUserRecommendations(List<Movie> movies) {
+        List<Movie> watchlist = getWatchList();
+        Map<Movie, Double> scores = new HashMap<>();
+        List<Movie> recommendations = new ArrayList<>();
+        for (Movie movie : movies) {
+            if (watchlist.contains(movie))
+                continue;
+            Double genreSimilarity = Double.valueOf(movie.getGenreSimilarity(watchlist));
+            Double score = movie.getImdbRate() + movie.getRating() + genreSimilarity;
+            scores.put(movie, score);
+        }
+        List<Map.Entry<Movie, Double> > sorted_scores = new ArrayList<Map.Entry<Movie, Double>>(scores.entrySet());
+
+        Collections.sort(sorted_scores, new Comparator<Map.Entry<Movie, Double> >() {
+            public int compare(Map.Entry<Movie, Double> o1, Map.Entry<Movie, Double> o2)
+            {
+                return (o1.getValue()).compareTo(o2.getValue());
+            }
+        });
+        Collections.reverse(sorted_scores);
+        for (Map.Entry<Movie, Double> entry : sorted_scores) {
+            recommendations.add(entry.getKey());
+            if (recommendations.size() == 3)
+                break;
+        }
+        return recommendations;
     }
 }

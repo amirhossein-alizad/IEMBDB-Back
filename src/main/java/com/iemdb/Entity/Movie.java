@@ -73,16 +73,16 @@ public class Movie {
         rating = userRating.stream().mapToDouble(Integer::intValue).sum() / userRating.size();
     }
 //
-//    private int getNumberOfSimilarGenres(Movie movie) {
-//        List<String> genres = getGenres();
-//        return (int) genres.stream().filter(c -> movie.getGenres().contains(c)).count();
-//    }
+    private int getNumberOfSimilarGenres(Movie movie) {
+        List<String> genres = getGenres();
+        return (int) genres.stream().filter(c -> movie.getGenres().contains(c)).count();
+    }
 //
-//    public int getGenreSimilarity(List<Movie> movies) {
-//        int genreSimilarity = 0;
-//        for (Movie movie : movies) {
-//            genreSimilarity += getNumberOfSimilarGenres(movie);
-//        }
-//        return genreSimilarity;
-//    }
+    public int getGenreSimilarity(List<Movie> movies) {
+        int genreSimilarity = 0;
+        for (Movie movie : movies) {
+            genreSimilarity += getNumberOfSimilarGenres(movie);
+        }
+        return genreSimilarity;
+    }
 }

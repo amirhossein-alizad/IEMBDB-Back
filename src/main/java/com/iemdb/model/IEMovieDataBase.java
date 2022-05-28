@@ -205,32 +205,32 @@ public class IEMovieDataBase {
 //        dataBase.removeMovieFromUserWatchList(movieId, userEmail);
 //    }
 //
-//    public List<Movie> getUserRecommendations(String userEmail) {
-//        User user = dataBase.getUserByEmail(userEmail);
-//        List<Movie> watchlist = user.getWatchList();
-//        Map<Movie, Double> scores = new HashMap<>();
-//        List<Movie> recommendations = new ArrayList<>();
-//        for (Movie movie : dataBase.getMovies()) {
-//            if (watchlist.contains(movie))
-//                continue;
-//            Double genreSimilarity = Double.valueOf(movie.getGenreSimilarity(watchlist));
-//            Double score = movie.getImdbRate() + movie.getRating() + genreSimilarity;
-//            scores.put(movie, score);
-//        }
-//        List<Map.Entry<Movie, Double> > sorted_scores = new ArrayList<Map.Entry<Movie, Double>>(scores.entrySet());
-//
-//        Collections.sort(sorted_scores, new Comparator<Map.Entry<Movie, Double> >() {
-//            public int compare(Map.Entry<Movie, Double> o1, Map.Entry<Movie, Double> o2)
-//            {
-//                return (o1.getValue()).compareTo(o2.getValue());
-//            }
-//        });
-//        Collections.reverse(sorted_scores);
-//        for (Map.Entry<Movie, Double> entry : sorted_scores) {
-//            recommendations.add(entry.getKey());
-//            if (recommendations.size() == 3)
-//                break;
-//        }
-//        return recommendations;
-//    }
+    public List<Movie> getUserRecommendations(String userEmail) {
+        User user = dataBase.getUserByEmail(userEmail);
+        List<Movie> watchlist = user.getWatchList();
+        Map<Movie, Double> scores = new HashMap<>();
+        List<Movie> recommendations = new ArrayList<>();
+        for (Movie movie : dataBase.getMovies()) {
+            if (watchlist.contains(movie))
+                continue;
+            Double genreSimilarity = Double.valueOf(movie.getGenreSimilarity(watchlist));
+            Double score = movie.getImdbRate() + movie.getRating() + genreSimilarity;
+            scores.put(movie, score);
+        }
+        List<Map.Entry<Movie, Double> > sorted_scores = new ArrayList<Map.Entry<Movie, Double>>(scores.entrySet());
+
+        Collections.sort(sorted_scores, new Comparator<Map.Entry<Movie, Double> >() {
+            public int compare(Map.Entry<Movie, Double> o1, Map.Entry<Movie, Double> o2)
+            {
+                return (o1.getValue()).compareTo(o2.getValue());
+            }
+        });
+        Collections.reverse(sorted_scores);
+        for (Map.Entry<Movie, Double> entry : sorted_scores) {
+            recommendations.add(entry.getKey());
+            if (recommendations.size() == 3)
+                break;
+        }
+        return recommendations;
+    }
 }
