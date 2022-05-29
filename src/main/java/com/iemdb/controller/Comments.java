@@ -17,13 +17,15 @@ import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.Optional;
 
 @RestController
 @AllArgsConstructor
-@CrossOrigin(origins = "*", allowedHeaders = "*")
 public class Comments {
     private UserRepository userRepository;
     private CommentRepository commentRepository;
@@ -32,14 +34,13 @@ public class Comments {
     public ResponseEntity<String> dislikeComment(@PathVariable int id) {
         Utils.wait(2000);
         try {
-            Optional<User> user = userRepository.findById(CurrentUser.username);
-            if(user.isEmpty())
-                throw new LoginRequired();
+            HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
+            User user = (User) request.getAttribute("user");
             Optional<Comment> comment = commentRepository.findById(id);
             if(comment.isEmpty())
                 throw new CommentNotFound();
             Comment comment1 = comment.get();
-            comment1.addVote(new CommentVote(user.get().getEmail(), id, -1));
+            comment1.addVote(new CommentVote(user.getEmail(), id, -1));
             commentRepository.save(comment1);
             return new ResponseEntity<>("Comment voted successfully!", HttpStatus.OK);
         } catch (RestException e) {
@@ -53,14 +54,13 @@ public class Comments {
     public ResponseEntity<String> likeComment(@PathVariable int id) {
         Utils.wait(2000);
         try {
-            Optional<User> user = userRepository.findById(CurrentUser.username);
-            if(user.isEmpty())
-                throw new LoginRequired();
+            HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
+            User user = (User) request.getAttribute("user");
             Optional<Comment> comment = commentRepository.findById(id);
             if(comment.isEmpty())
                 throw new CommentNotFound();
             Comment comment1 = comment.get();
-            comment1.addVote(new CommentVote(user.get().getEmail(), id, 1));
+            comment1.addVote(new CommentVote(user.getEmail(), id, 1));
             commentRepository.save(comment1);
             return new ResponseEntity<>("Comment voted successfully!", HttpStatus.OK);
         } catch (RestException e) {

@@ -186,8 +186,6 @@ public class DataBase {
         if (movie == null)
             throw new MovieNotFound();
         User user = getUserByEmail(userId);
-        System.out.println(user);
-        System.out.println(movie);
         user.addToWatchList(movie);
     }
 

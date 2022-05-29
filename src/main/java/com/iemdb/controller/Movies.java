@@ -16,8 +16,11 @@ import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -25,7 +28,6 @@ import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
 @RestController
-@CrossOrigin(origins = "*", allowedHeaders = "*")
 @AllArgsConstructor
 public class Movies {
 
@@ -87,21 +89,20 @@ public class Movies {
     public ResponseEntity<String> rateMovie(@PathVariable int id, @RequestBody Map<String, String> input) {
         Utils.wait(2000);
         try {
-            Optional<User> user = userRepository.findById(CurrentUser.username);
-            if(user.isEmpty())
-                throw new LoginRequired();
+            HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
+            User user = (User) request.getAttribute("user");
             Optional<Movie> movie = movieRepository.findById(id);
             if(movie.isEmpty())
                 throw new MovieNotFound();
             int rate = Integer.parseInt(input.get("quantity"));
             Movie movie1 = movie.get();
-            movie1.addRating(new MovieRating(user.get().getEmail(), id, rate));
+            movie1.addRating(new MovieRating(user.getEmail(), id, rate));
             movieRepository.save(movie1);
             return new ResponseEntity<>("Movie rated successfully!", HttpStatus.OK);
         } catch (RestException e) {
             return new ResponseEntity<>(e.getMessage(), e.getStatusCode());
         } catch (Exception e) {
-            System.out.println(e);
+            System.out.println(e.getMessage());
             return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
     }
@@ -111,14 +112,13 @@ public class Movies {
         Utils.wait(2000);
         try {
             input.computeIfAbsent("comment", key -> {throw new RuntimeException(key + " not found!");});
-            Optional<User> user = userRepository.findById(CurrentUser.username);
-            if(user.isEmpty())
-                throw new LoginRequired();
+            HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
+            User user = (User) request.getAttribute("user");
             String comment = input.get("comment");
             Optional<Movie> movie = movieRepository.findById(id);
             if(movie.isEmpty())
                 throw new MovieNotFound();
-            Comment newComment = new Comment(user.get().getEmail(), id, comment);
+            Comment newComment = new Comment(user.getEmail(), id, comment);
             commentRepository.save(newComment);
             return new ResponseEntity<>("Comment added successfully!", HttpStatus.OK);
         } catch (RestException e) {
@@ -139,7 +139,7 @@ public class Movies {
         } catch (RestException e) {
             return new ResponseEntity<>(null, e.getStatusCode());
         } catch (Exception e) {
-            System.out.println(e);
+            System.out.println(e.getMessage());
             return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
         }
     }
