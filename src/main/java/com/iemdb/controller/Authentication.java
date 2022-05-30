@@ -28,6 +28,7 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Calendar;
@@ -50,6 +51,16 @@ public class Authentication {
         try {
             String username = input.get("username");
             String password = input.get("password");
+
+            try {
+                MessageDigest digest = MessageDigest.getInstance("SHA-256");
+                byte[] hashBytes = digest.digest(password.getBytes(StandardCharsets.UTF_8));
+                password = new String(hashBytes, StandardCharsets.UTF_8);
+            } catch (Exception e) {
+                System.out.println(e.getMessage());
+                System.exit(-1);
+            }
+
             Optional<User> user = userRepository.findById(username);
             if(user.isEmpty())
                 throw new UserNotFound();
@@ -96,31 +107,34 @@ public class Authentication {
             ObjectMapper objectMapper = new ObjectMapper();
             ObjectNode resp = objectMapper.createObjectNode();
             resp.put("error", e.getMessage());
-            return new ResponseEntity<>(resp, HttpStatus.OK);
+            return new ResponseEntity<>(resp, HttpStatus.BAD_REQUEST);
         }
     }
 
     @GetMapping("/user")
-    public ResponseEntity<User> user() {
+    public ResponseEntity<JsonNode> user() {
         Utils.wait(2000);
         try {
             HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
             User user = (User) request.getAttribute("user");
-            return new ResponseEntity<>(user, HttpStatus.OK);
+            ObjectMapper objectMapper = new ObjectMapper();
+            ObjectNode resp = objectMapper.createObjectNode();
+            resp.put("email", user.getEmail());
+            return new ResponseEntity<>(resp, HttpStatus.OK);
         } catch (Exception e) {
-            System.out.println(e);
-            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+            System.out.println(e.getMessage());
+            ObjectMapper objectMapper = new ObjectMapper();
+            ObjectNode resp = objectMapper.createObjectNode();
+            resp.put("error", e.getMessage());
+            return new ResponseEntity<>(resp, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
     @GetMapping("/callback")
-    public ResponseEntity<String> callback(@RequestParam("code") String code) {
+    public ResponseEntity<JsonNode> callback(@RequestParam("code") String code) {
         Utils.wait(2000);
-        System.out.println(code);
-
         try {
             String url = String.format("https://github.com/login/oauth/access_token?client_id=f91cb2bad21d5c303ca9&client_secret=68ccc847fdb4e0e7f214a3ac5462385fd48cae25&code=%s", code);
-            System.out.println(url);
             HttpClient client = HttpClient.newHttpClient();
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(URI.create(url))
@@ -128,9 +142,7 @@ public class Authentication {
                     .build();
             HttpResponse<String> response = client.send(request,
                     HttpResponse.BodyHandlers.ofString());
-            System.out.println(response.body());
             String accessToken =response.body().split("[&=]")[1];
-            System.out.println(accessToken);
             url = "https://api.github.com/user";
             request = HttpRequest.newBuilder()
                     .uri(URI.create(url))
@@ -138,16 +150,39 @@ public class Authentication {
                     .header("Authorization", String.format("Bearer %s", accessToken))
                     .build();
             response = client.send(request, HttpResponse.BodyHandlers.ofString());
-            System.out.println(response.body());
             ObjectMapper mapper = new ObjectMapper();
             HashMap<String, String> json = mapper.readValue(response.body(), HashMap.class);
-            System.out.println(json.get("login"));
-        } catch (Exception e) {
-            System.out.println("mother fucker bitch");
-            System.out.println(e);
-        }
 
-        return new ResponseEntity<>(code, HttpStatus.OK);
+            String email = json.get("email");
+            String nickname = json.get("login");
+            String name = json.get("name");
+            String password = "";
+            String created_at = json.get("created_at");
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+            LocalDate birthdate = LocalDate.parse(created_at.substring(0, 10), formatter).minusYears(18);
+            Optional<User> user = userRepository.findById(email);
+            if (user.isPresent()) {
+                user.get().setBirthDate(birthdate);
+                user.get().setName(name);
+                user.get().setNickname(nickname);
+                user.get().setPassword(password);
+                userRepository.save(user.get());
+            } else {
+                User createdUser = new User(email, password, nickname, name, birthdate);
+                userRepository.save(createdUser);
+            }
+            String jwt = createToken(email);
+            ObjectMapper objectMapper = new ObjectMapper();
+            ObjectNode resp = objectMapper.createObjectNode();
+            resp.put("token", jwt);
+            return new ResponseEntity<>(resp, HttpStatus.OK);
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+            ObjectMapper objectMapper = new ObjectMapper();
+            ObjectNode resp = objectMapper.createObjectNode();
+            resp.put("error", e.getMessage());
+            return new ResponseEntity<>(resp, HttpStatus.BAD_REQUEST);
+        }
     }
 
     private String createToken(String user) {

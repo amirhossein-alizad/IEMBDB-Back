@@ -45,6 +45,7 @@ public class AuthFilter implements Filter {
             add("login");
             add("signup");
             add("callback");
+            add("movies");
         }
     };
 
@@ -88,15 +89,13 @@ public class AuthFilter implements Filter {
             }
             User validUser = user.get();
             request.setAttribute("user", validUser);
+            filterchain.doFilter(request, response);
         } catch (JwtException e) {
             System.out.println(e.getMessage());
             ((HttpServletResponse) response).setStatus(HttpServletResponse.SC_FORBIDDEN);
             response.getWriter().write("{\"error\": \"BAD JWT\"}");
             ((HttpServletResponse) response).setHeader("Content-Type", "application/json;charset=UTF-8");
-            return;
         }
-
-        filterchain.doFilter(request, response);
     }
 
     @Override

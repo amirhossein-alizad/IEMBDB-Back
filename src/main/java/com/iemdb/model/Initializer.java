@@ -55,7 +55,7 @@ public class Initializer {
             getUsersFromService();
             getCommentsFromService();
         } catch (Exception e) {
-            System.out.println(e);
+            System.out.println(e.getMessage());
         }
     }
 
