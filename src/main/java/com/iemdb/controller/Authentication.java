@@ -108,6 +108,7 @@ public class Authentication {
             User user = (User) request.getAttribute("user");
             return new ResponseEntity<>(user, HttpStatus.OK);
         } catch (Exception e) {
+            System.out.println(e);
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }

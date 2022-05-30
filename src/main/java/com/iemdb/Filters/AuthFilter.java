@@ -81,7 +81,13 @@ public class AuthFilter implements Filter {
                 throw new JwtException("Token is expired");
             String username = jwsClaims.getBody().get("user", String.class);
             Optional<User> user = userRepository.findById(username);
-            request.setAttribute("user", user);
+            if (user.isEmpty()) {
+                ((HttpServletResponse) response).setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                response.getWriter().write("{\"error\": \"Incorrect or expired JWT\"}");
+                return;
+            }
+            User validUser = user.get();
+            request.setAttribute("user", validUser);
         } catch (JwtException e) {
             System.out.println(e.getMessage());
             ((HttpServletResponse) response).setStatus(HttpServletResponse.SC_FORBIDDEN);
