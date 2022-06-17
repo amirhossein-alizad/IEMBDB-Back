@@ -38,13 +38,13 @@ public class Movies {
 
     @GetMapping("/movies")
     public List<Movie> getMovies() {
-        Utils.wait(2000);
+        
         return StreamSupport.stream(movieRepository.findAll().spliterator(), false).collect(Collectors.toList());
     }
 
     @GetMapping("/movies/{id}")
     public ResponseEntity<Movie> getMovie(@PathVariable int id) {
-        Utils.wait(2000);
+        
         Optional<Movie> movie = movieRepository.findById(id);
         if (movie.isEmpty()) {
             return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
@@ -54,7 +54,7 @@ public class Movies {
 //
     @GetMapping("/movies/{id}/actors")
     public ResponseEntity<List<Actor>> getMovieActors(@PathVariable int id) {
-        Utils.wait(2000);
+        
         try {
             Optional<Movie> movie = movieRepository.findById(id);
             if (movie.isEmpty())
@@ -68,7 +68,7 @@ public class Movies {
 //
 //    @PostMapping("/movies")
 //    public ResponseEntity<List<Movie>> filterMovies(@RequestBody Map<String, String> input) {
-//        Utils.wait(2000);
+//        
 //        try {
 //            input.computeIfAbsent("searchText", key -> {throw new RuntimeException(key + " not found!");});
 //            input.computeIfAbsent("searchBy", key -> {throw new RuntimeException(key + " not found!");});
@@ -87,7 +87,7 @@ public class Movies {
 //
     @PostMapping("/movies/{id}/rate")
     public ResponseEntity<String> rateMovie(@PathVariable int id, @RequestBody Map<String, String> input) {
-        Utils.wait(2000);
+        
         try {
             HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
             User user = (User) request.getAttribute("user");
@@ -109,7 +109,7 @@ public class Movies {
 
     @PostMapping("/movies/{id}/comments")
     public ResponseEntity<String> commentOnMovie(@PathVariable int id, @RequestBody Map<String, String> input) {
-        Utils.wait(2000);
+        
         try {
             input.computeIfAbsent("comment", key -> {throw new RuntimeException(key + " not found!");});
             HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
@@ -130,7 +130,7 @@ public class Movies {
 
     @GetMapping("/movies/{id}/comments")
     public ResponseEntity<List<Comment>> getMovieComments(@PathVariable int id) {
-        Utils.wait(2000);
+        
         try {
             Optional<Movie> movie = movieRepository.findById(id);
             if (movie.isEmpty())

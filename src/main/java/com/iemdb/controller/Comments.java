@@ -32,7 +32,7 @@ public class Comments {
 
     @PostMapping("/comments/{id}/dislike")
     public ResponseEntity<String> dislikeComment(@PathVariable int id) {
-        Utils.wait(2000);
+        
         try {
             HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
             User user = (User) request.getAttribute("user");
@@ -52,7 +52,7 @@ public class Comments {
 
     @PostMapping("/comments/{id}/like")
     public ResponseEntity<String> likeComment(@PathVariable int id) {
-        Utils.wait(2000);
+        
         try {
             HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
             User user = (User) request.getAttribute("user");
