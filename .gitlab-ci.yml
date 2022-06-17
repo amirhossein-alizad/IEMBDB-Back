@@ -1,0 +1,14 @@
+stages:
+  - build
+  - deploy
+
+build:
+  image: docker:latest
+  stage: build
+  services:
+    - docker:dind
+  before_script:
+    - docker login -u "$QUAY_USER" -p "$QUAY_PASS" quay.io
+  script:
+    - docker build -t quay.io/pkootzari2/iemdb:$CI_COMMIT_SHA .
+    - docker push quay.io/pkootzari2/iemdb:$CI_COMMIT_SHA

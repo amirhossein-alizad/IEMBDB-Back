@@ -28,20 +28,18 @@ public class Actors {
 
     @GetMapping("/actors")
     public List<Actor> getActors() {
-        Utils.wait(2000);
         return StreamSupport.stream(actorRepository.findAll().spliterator(), false).collect(Collectors.toList());
     }
 
     @GetMapping("/actors/{id}")
     public ResponseEntity<Actor> getActor(@PathVariable int id) {
-        Utils.wait(2000);
         Optional<Actor> actor = actorRepository.findById(id);
         return actor.map(value -> new ResponseEntity<>(value, HttpStatus.OK)).orElseGet(() -> new ResponseEntity<>(null, HttpStatus.NOT_FOUND));
     }
 
     @GetMapping("/actors/{id}/movies")
     public ResponseEntity<List<Movie>> getActorMovies(@PathVariable int id) {
-        Utils.wait(2000);
+        
         try {
             Optional<Actor> optionalActor = actorRepository.findById(id);
             if (optionalActor.isEmpty())

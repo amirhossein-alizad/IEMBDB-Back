@@ -32,7 +32,7 @@ public class WatchList {
 
     @GetMapping("/watchlist")
     public ResponseEntity<List<Movie>> getWatchList() {
-        Utils.wait(2000);
+        
         try {
             HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
             User user = (User) request.getAttribute("user");
@@ -46,7 +46,7 @@ public class WatchList {
 
     @PostMapping("/watchlist")
     public ResponseEntity<String> addToWatchlist(@RequestBody Map<String, String> input) {
-        Utils.wait(2000);
+        
         try {
             HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
             User user = (User) request.getAttribute("user");
@@ -68,7 +68,7 @@ public class WatchList {
 
     @PostMapping("/watchlist/remove")
     public ResponseEntity<String> removeFromWatchlist(@RequestBody Map<String, String> input) {
-        Utils.wait(2000);
+        
         try {
             HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
             User user = (User) request.getAttribute("user");
@@ -88,7 +88,7 @@ public class WatchList {
 
     @GetMapping("/recommendations")
     public ResponseEntity<List<Movie>> getRecommendation() {
-        Utils.wait(2000);
+        
         try {
             HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
             User user = (User) request.getAttribute("user");

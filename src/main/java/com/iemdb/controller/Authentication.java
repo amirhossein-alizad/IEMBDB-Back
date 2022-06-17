@@ -47,7 +47,7 @@ public class Authentication {
 
     @PostMapping("/login")
     public ResponseEntity<JsonNode> login(@RequestBody Map<String, String> input) {
-        Utils.wait(2000);
+        
         try {
             String username = input.get("username");
             String password = input.get("password");
@@ -87,7 +87,7 @@ public class Authentication {
 
     @PostMapping("/signup")
     public ResponseEntity<JsonNode> signup(@RequestBody Map<String, String> input) {
-        Utils.wait(2000);
+        
         try {
             input.computeIfAbsent("email", key -> {throw new RuntimeException(key + " not found!");});
             input.computeIfAbsent("password", key -> {throw new RuntimeException(key + " not found!");});
@@ -113,7 +113,7 @@ public class Authentication {
 
     @GetMapping("/user")
     public ResponseEntity<JsonNode> user() {
-        Utils.wait(2000);
+        
         try {
             HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
             User user = (User) request.getAttribute("user");
@@ -132,7 +132,7 @@ public class Authentication {
 
     @GetMapping("/callback")
     public ResponseEntity<JsonNode> callback(@RequestParam("code") String code) {
-        Utils.wait(2000);
+        
         try {
             String url = String.format("https://github.com/login/oauth/access_token?client_id=f91cb2bad21d5c303ca9&client_secret=68ccc847fdb4e0e7f214a3ac5462385fd48cae25&code=%s", code);
             HttpClient client = HttpClient.newHttpClient();
